@@ -1,10 +1,11 @@
-# SymChat - Beautiful Ollama Chat UI
+# SymChat - Advanced Ollama Chat UI
 
 > **Privacy Focused:**  
-SymChat is designed with privacy as a core principle. All conversations and data are stored locally on your device—nothing is sent to external servers by default. Our goal is to empower users with full control of their AI experience, discourage unnecessary data collection, and ensure your interactions remain private and secure.
-
+> SymChat is designed with privacy as a core principle. All conversations and data are stored locally on your device—nothing is sent to external servers by default. Our goal is to empower users with full control of their AI experience, discourage unnecessary data collection, and ensure your interactions remain private and secure.
 
 ## Features
+
+### Core Features
 
 - 🎨 **Beautiful Modern UI** - Clean and intuitive interface with dark mode support
 - 💬 **Real-time Chat** - Stream responses from Ollama models in real-time
@@ -14,11 +15,21 @@ SymChat is designed with privacy as a core principle. All conversations and data
 - 📦 **Model Manager** - Download, view, and manage Ollama models from the UI
 - 🤖 **Model Selection** - Choose from available Ollama models
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
-- 🎯 **Markdown Support** - Rich text formatting for code and formatted content
-- 👁️ **Code Preview** - Live preview for HTML, CSS, and JavaScript code
 - 🌙 **Dark Mode** - Eye-friendly dark theme
 - 📤 **Export/Import** - Backup and restore your data anytime
-- 🔍 **Auto Web Search** - Intelligent web search that activates when needed
+
+### Advanced Features
+
+- 🔍 **Auto Web Search** - Intelligent web search that activates when needed (DuckDuckGo, SearxNG, Brave)
+- 🧠 **Deep Research** - Multi-step web research with comprehensive analysis and synthesis
+- 📚 **RAG (Document Manager)** - Upload documents (PDF, DOCX, XLSX, CSV, JSON, TXT, MD, HTML, XML) for AI context
+- 👁️ **Vision/Multimodal Support** - Support for vision models (LLaVA, Llama 3.2 Vision, etc.) to analyze images
+- 📸 **OCR (Image Text Extraction)** - Extract text from images using Tesseract OCR
+- 🎯 **Code Preview** - Live preview for HTML, CSS, and JavaScript code in sandboxed iframe
+- 📊 **Generation Settings** - Fine-tune AI parameters (temperature, max_tokens, top_p, top_k, repeat_penalty)
+- ⚙️ **Custom System Prompts** - Override default AI behavior with custom instructions
+- 📎 **File Attachments** - Support for multiple file types with visual previews
+- 🎯 **Markdown Support** - Rich text formatting with code syntax highlighting
 
 ## Prerequisites
 
@@ -32,22 +43,26 @@ SymChat is designed with privacy as a core principle. All conversations and data
 The easiest way to run SymChat with Ollama:
 
 **Linux/macOS:**
+
 ```bash
 chmod +x docker-setup.sh
 ./docker-setup.sh
 ```
 
 **Windows:**
+
 ```batch
 docker-setup.bat
 ```
 
 **Or manually:**
+
 ```bash
 docker-compose up -d
 ```
 
 Then open http://localhost:3000 and download a model via the Model Manager:
+
 - Click **Settings** (⚙️) → **Model Manager**
 - Choose a model and click **Download**
 
@@ -97,7 +112,7 @@ SymChat includes a powerful memory system that helps the AI remember important i
 ### Memory Categories
 
 - **User Info** 👤 - Personal information about you
-- **Preference** ⚙️ - Your likes and preferences  
+- **Preference** ⚙️ - Your likes and preferences
 - **Fact** 💡 - Important facts to remember
 - **Context** 📄 - General context about projects
 
@@ -129,12 +144,14 @@ SymChat uses **IndexedDB** (via Dexie.js) as its local, opensource database:
 Search the web and use results as context for AI conversations!
 
 **Features:**
+
 - 🔍 **DuckDuckGo** - Free, no API key needed (default)
 - 🔍 **SearxNG** - Opensource, self-hostable metasearch
 - 🔍 **Brave Search** - Optional, free tier available
 - 🔒 **Privacy-Focused** - No tracking, no ads
 
 **How to Use:**
+
 1. Toggle **"Auto Web Search"** ON (above message input)
 2. Send your message normally
 3. System analyzes if web search is needed
@@ -142,12 +159,14 @@ Search the web and use results as context for AI conversations!
 5. AI responds with current web information!
 
 **Smart Detection:**
+
 - Detects questions about current info ("latest", "today", "2024")
 - Extracts search queries automatically
 - Only searches when helpful
 - Toast notifications show search progress
 
 **Configure:**
+
 - Settings → Search Settings
 - Choose provider (DuckDuckGo, SearxNG, Brave)
 - No setup needed for DuckDuckGo!
@@ -159,6 +178,7 @@ Search the web and use results as context for AI conversations!
 Download and manage Ollama models directly from the UI!
 
 **Features:**
+
 - 📦 **One-Click Downloads** - Popular models with single click
 - 🔍 **Search Models** - Find models by name, description, or tags
 - 📊 **View Installed** - See all your downloaded models
@@ -167,6 +187,7 @@ Download and manage Ollama models directly from the UI!
 - 📈 **Progress Tracking** - Real-time download progress bars
 
 **How to Use:**
+
 1. Click **Settings** → **Model Manager**
 2. Browse popular models or enter custom name
 3. Click **"Download"** on any model
@@ -174,6 +195,7 @@ Download and manage Ollama models directly from the UI!
 5. Model appears in chat selector when ready!
 
 **Popular Models:**
+
 - **llama3.2** - Latest from Meta (2GB)
 - **mistral** - Fast and efficient (4.1GB)
 - **codellama** - Specialized for code (3.8GB)
@@ -187,6 +209,7 @@ Download and manage Ollama models directly from the UI!
 Preview HTML, CSS, and JavaScript code directly in the chat!
 
 **Features:**
+
 - 👁️ **Live Preview** - Instant rendering in sandboxed iframe
 - 🎨 **Auto-Detection** - Preview button appears for web code
 - 🔒 **Secure** - Isolated sandbox for safe execution
@@ -194,6 +217,7 @@ Preview HTML, CSS, and JavaScript code directly in the chat!
 - 🔄 **View Source** - Toggle between preview and generated HTML
 
 **How to Use:**
+
 1. Ask AI to generate HTML/CSS/JS code
 2. Preview button appears below code blocks
 3. Click **"Preview HTML/CSS/JS"**
@@ -201,6 +225,7 @@ Preview HTML, CSS, and JavaScript code directly in the chat!
 5. Copy code when satisfied!
 
 **Example:**
+
 ```
 You: "Create a gradient button"
 AI: [Generates HTML/CSS]
@@ -245,14 +270,39 @@ sympchat/
 
 ## Technologies Used
 
+### Frontend & UI
+
 - **React 18** - UI library
 - **Vite** - Build tool and dev server
 - **TypeScript** - Type safety
 - **shadcn/ui** - Beautiful, accessible component library
 - **Tailwind CSS** - Utility-first CSS framework
 - **Radix UI** - Unstyled, accessible component primitives
+
+### AI & LLM
+
 - **Ollama** - Local LLM inference
 - **IndexedDB** - Local database (via Dexie.js)
+
+### Document Processing
+
+- **PDF.js** - PDF parsing and text extraction
+- **Mammoth** - DOCX document parsing
+- **ExcelJS** - Excel spreadsheet parsing
+- **PapaParse** - CSV parsing
+
+### Image & Vision
+
+- **Tesseract.js** - OCR text extraction from images
+
+### Web Search
+
+- **DuckDuckGo** - Free web search API
+- **SearxNG** - Self-hostable metasearch engine
+- **Brave Search** - Privacy-focused search API
+
+### Deployment
+
 - **Docker** - Containerization and deployment
 - **Nginx** - Production web server
 
@@ -261,6 +311,7 @@ sympchat/
 ### Docker Deployment (Recommended)
 
 **Quick Commands:**
+
 ```bash
 # Start services
 npm run docker:up
@@ -279,6 +330,7 @@ npm run docker:clean
 ```
 
 **Manual Control:**
+
 ```bash
 # Build and start
 docker-compose up -d
@@ -300,6 +352,7 @@ docker-compose down -v
 **Download Models:**
 
 **Recommended: Use the Model Manager UI**
+
 1. Open http://localhost:3000
 2. Click **Settings** (⚙️) → **Model Manager**
 3. Browse and download models with one click
@@ -307,6 +360,7 @@ docker-compose down -v
    - Vision: llava, llama3.2-vision
 
 **Alternative: CLI (for advanced users)**
+
 ```bash
 docker exec -it symchat-ollama ollama pull llama3.2
 docker exec -it symchat-ollama ollama pull mistral
@@ -315,11 +369,13 @@ docker exec -it symchat-ollama ollama pull mistral
 ### Traditional Deployment
 
 **Build for production:**
+
 ```bash
 npm run build
 ```
 
 **Serve with any static file server:**
+
 ```bash
 # Using serve
 npx serve -s dist -p 3000
@@ -345,6 +401,7 @@ If you can't connect to Ollama:
 If you encounter CORS issues, you may need to configure Ollama to allow requests from your frontend:
 
 Set the `OLLAMA_ORIGINS` environment variable:
+
 ```bash
 # On macOS/Linux
 export OLLAMA_ORIGINS="http://localhost:3000"
@@ -360,4 +417,3 @@ MIT License - feel free to use this project however you'd like!
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
