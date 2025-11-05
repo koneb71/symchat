@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad1)" filter="url(#glow)"/>
+  
+  <!-- Chat Bubble -->
+  <path d="M 30 35 Q 30 25 40 25 L 70 25 Q 80 25 80 35 L 80 55 Q 80 65 70 65 L 45 65 L 35 75 L 35 65 Q 30 65 30 55 Z" 
+        fill="white" opacity="0.95"/>
+  
+  <!-- Sparkle 1 -->
+  <path d="M 65 40 L 67 42 L 65 44 L 63 42 Z" fill="white" opacity="0.9"/>
+  <path d="M 65 38 L 65 46 M 61 42 L 69 42" stroke="white" stroke-width="1.5" opacity="0.9"/>
+  
+  <!-- Sparkle 2 -->
+  <path d="M 45 48 L 46.5 49.5 L 45 51 L 43.5 49.5 Z" fill="white" opacity="0.8"/>
+  <path d="M 45 47 L 45 52 M 42.5 49.5 L 47.5 49.5" stroke="white" stroke-width="1.2" opacity="0.8"/>
+  
+  <!-- AI Symbol -->
+  <circle cx="55" cy="42" r="2" fill="url(#grad1)"/>
+  <circle cx="55" cy="52" r="2" fill="url(#grad1)"/>
+  <path d="M 55 44 L 55 50" stroke="url(#grad1)" stroke-width="2"/>
+</svg>
+

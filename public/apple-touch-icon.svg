@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="apple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    <filter id="apple-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background Circle with rounded corners for iOS -->
+  <rect width="180" height="180" rx="40" fill="url(#apple-grad)" filter="url(#apple-glow)"/>
+  
+  <!-- Chat Bubble (scaled up) -->
+  <path d="M 54 63 Q 54 45 72 45 L 126 45 Q 144 45 144 63 L 144 99 Q 144 117 126 117 L 81 117 L 63 135 L 63 117 Q 54 117 54 99 Z" 
+        fill="white" opacity="0.95"/>
+  
+  <!-- Sparkle 1 (scaled up) -->
+  <path d="M 117 72 L 120.6 75.6 L 117 79.2 L 113.4 75.6 Z" fill="white" opacity="0.9"/>
+  <path d="M 117 68.4 L 117 82.8 M 109.8 75.6 L 124.2 75.6" stroke="white" stroke-width="2.7" opacity="0.9"/>
+  
+  <!-- Sparkle 2 (scaled up) -->
+  <path d="M 81 86.4 L 83.7 89.1 L 81 91.8 L 78.3 89.1 Z" fill="white" opacity="0.8"/>
+  <path d="M 81 84.6 L 81 93.6 M 76.5 89.1 L 85.5 89.1" stroke="white" stroke-width="2.16" opacity="0.8"/>
+  
+  <!-- AI Symbol (scaled up) -->
+  <circle cx="99" cy="75.6" r="3.6" fill="url(#apple-grad)"/>
+  <circle cx="99" cy="93.6" r="3.6" fill="url(#apple-grad)"/>
+  <path d="M 99 79.2 L 99 90" stroke="url(#apple-grad)" stroke-width="3.6"/>
+</svg>
+
