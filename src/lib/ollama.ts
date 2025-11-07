@@ -203,3 +203,32 @@ export async function showModelInfo(modelName: string): Promise<any> {
     return null
   }
 }
+
+/**
+ * Preload a model into Ollama's memory for faster first response
+ * This sends a minimal request to load the model without generating output
+ */
+export async function preloadModel(modelName: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${OLLAMA_API_URL}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: modelName,
+        prompt: '',
+        keep_alive: '5m', // Keep model in memory for 5 minutes
+        stream: false,
+      }),
+    })
+    
+    if (!response.ok) {
+      console.error(`Failed to preload model: ${response.statusText}`)
+      return false
+    }
+    
+    return true
+  } catch (error) {
+    console.error('Failed to preload model:', error)
+    return false
+  }
+}
