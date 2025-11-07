@@ -290,6 +290,7 @@ function escapeRegExp(str: string): string {
 }
 
 // Simple keyword-based search in chunks
+// Keyword-based search (fallback)
 export function searchChunks(
   chunks: DocumentChunk[],
   query: string,
@@ -318,6 +319,43 @@ export function searchChunks(
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
     .map(sc => sc.chunk)
+}
+
+// Semantic search using embeddings (advanced)
+export async function searchChunksSemantic(
+  chunks: DocumentChunk[],
+  query: string,
+  topK: number = 5
+): Promise<DocumentChunk[]> {
+  // Import embeddings lazily
+  const { findSimilarTexts } = await import('./embeddings')
+
+  try {
+    // Filter chunks that have embeddings
+    const chunksWithEmbeddings = chunks.filter(chunk => chunk.embedding && chunk.embedding.length > 0)
+
+    if (chunksWithEmbeddings.length === 0) {
+      // Fall back to keyword search if no embeddings
+      console.log('No embeddings found, falling back to keyword search')
+      return searchChunks(chunks, query, topK)
+    }
+
+    // Find similar chunks using embeddings
+    const results = await findSimilarTexts(
+      query,
+      chunksWithEmbeddings.map(chunk => ({
+        text: chunk.text,
+        embedding: chunk.embedding!,
+      })),
+      topK
+    )
+
+    // Return chunks ordered by similarity
+    return results.map(result => chunksWithEmbeddings[result.index])
+  } catch (error) {
+    console.error('Semantic search failed, falling back to keyword search:', error)
+    return searchChunks(chunks, query, topK)
+  }
 }
 
 // Format chunks for context

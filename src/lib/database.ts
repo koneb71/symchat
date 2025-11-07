@@ -56,6 +56,7 @@ export interface DocumentChunk {
   text: string
   pageNumber: number
   chunkIndex: number
+  embedding?: number[] // Vector embedding for semantic search
 }
 
 // Dexie Database class

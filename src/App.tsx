@@ -12,6 +12,7 @@ import { FileUpload, type UploadedFile } from './components/FileUpload'
 import { DocumentManager } from './components/DocumentManager'
 import { DeepResearch } from './components/DeepResearch'
 import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog'
+import { PromptLibrary } from './components/PromptLibrary'
 import { LogoIcon } from './components/Logo'
 import {
   GenerationSettings,
@@ -50,6 +51,7 @@ function App() {
   const [isDocumentManagerOpen, setIsDocumentManagerOpen] = useState(false)
   const [isDeepResearchOpen, setIsDeepResearchOpen] = useState(false)
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
+  const [isPromptLibraryOpen, setIsPromptLibraryOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [ragEnabled, setRagEnabled] = useState(false)
   const [searchContext, setSearchContext] = useState<string>('')
@@ -661,11 +663,15 @@ function App() {
     // RAG: Retrieve relevant documents if enabled
     if (ragEnabled) {
       try {
-        const { searchChunks, formatChunksForContext } = await import('./lib/document-parser')
+        const { searchChunksSemantic, searchChunks, formatChunksForContext } = await import('./lib/document-parser')
         const allChunks = await DatabaseService.getAllChunks()
         
         if (allChunks.length > 0) {
-          const relevantChunks = searchChunks(allChunks as any, content, 5)
+          // Try semantic search first (if embeddings exist), fall back to keyword search
+          const hasEmbeddings = allChunks.some(chunk => chunk.embedding && chunk.embedding.length > 0)
+          const relevantChunks = hasEmbeddings 
+            ? await searchChunksSemantic(allChunks as any, content, 5)
+            : searchChunks(allChunks as any, content, 5)
           
           if (relevantChunks.length > 0) {
             // Get document names
@@ -686,7 +692,7 @@ function App() {
             })
             
             toast({
-              title: 'RAG Active',
+              title: hasEmbeddings ? 'RAG Active (Semantic)' : 'RAG Active (Keyword)',
               description: `Retrieved ${relevantChunks.length} relevant excerpts from ${Object.keys(chunksByDoc).length} document(s)`,
             })
           }
@@ -867,6 +873,89 @@ function App() {
     }
   }
 
+  const handleEditMessage = async (index: number, newContent: string) => {
+    if (!currentConversationId) return
+
+    // Remove messages from the edited index onwards
+    const messagesToKeep = messages.slice(0, index)
+    setMessages(messagesToKeep)
+
+    // Delete messages from database
+    await DatabaseService.deleteMessages(currentConversationId)
+    for (const msg of messagesToKeep) {
+      await DatabaseService.addMessage({
+        conversation_id: currentConversationId,
+        role: msg.role,
+        content: msg.content,
+        images: msg.images,
+        files: msg.files,
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    // Send the edited message
+    await handleSendMessage(newContent)
+  }
+
+  const handleRegenerateMessage = async (fromIndex: number) => {
+    if (!currentConversationId) return
+
+    // Get the user message before the assistant response
+    const userMessageIndex = fromIndex - 1
+    if (userMessageIndex < 0 || messages[userMessageIndex].role !== 'user') return
+
+    // Remove messages from the assistant message index onwards
+    const messagesToKeep = messages.slice(0, fromIndex)
+    setMessages(messagesToKeep)
+
+    // Delete and re-save messages to database
+    await DatabaseService.deleteMessages(currentConversationId)
+    for (const msg of messagesToKeep) {
+      await DatabaseService.addMessage({
+        conversation_id: currentConversationId,
+        role: msg.role,
+        content: msg.content,
+        images: msg.images,
+        files: msg.files,
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    // Regenerate from the last user message
+    const lastUserMessage = messages[userMessageIndex]
+    await handleSendMessage(lastUserMessage.content)
+  }
+
+  const handleDeleteMessage = async (index: number) => {
+    if (!currentConversationId) return
+
+    // Remove the message
+    const updatedMessages = messages.filter((_, idx) => idx !== index)
+    setMessages(updatedMessages)
+
+    // Update database
+    await DatabaseService.deleteMessages(currentConversationId)
+    for (const msg of updatedMessages) {
+      await DatabaseService.addMessage({
+        conversation_id: currentConversationId,
+        role: msg.role,
+        content: msg.content,
+        images: msg.images,
+        files: msg.files,
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    toast({
+      title: 'Message Deleted',
+      description: 'Message removed from conversation',
+    })
+  }
+
+  const handleCopyMessage = (content: string) => {
+    // Toast is handled in MessageActions component
+  }
+
   return (
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar
@@ -885,6 +974,7 @@ function App() {
         onOpenDocuments={() => setIsDocumentManagerOpen(true)}
         onOpenDeepResearch={() => setIsDeepResearchOpen(true)}
         onOpenKeyboardShortcuts={() => setIsKeyboardShortcutsOpen(true)}
+        onOpenPromptLibrary={() => setIsPromptLibraryOpen(true)}
       />
 
       <div className="flex-1 flex flex-col">
@@ -945,6 +1035,11 @@ function App() {
                       content={msg.content}
                       images={msg.images}
                       files={msg.files}
+                      messageIndex={idx}
+                      onEdit={handleEditMessage}
+                      onRegenerate={handleRegenerateMessage}
+                      onDelete={handleDeleteMessage}
+                      onCopy={handleCopyMessage}
                     />
                   ))}
                 {isGenerating && (
@@ -1095,6 +1190,18 @@ function App() {
       <KeyboardShortcutsDialog
         open={isKeyboardShortcutsOpen}
         onOpenChange={setIsKeyboardShortcutsOpen}
+      />
+
+      <PromptLibrary
+        isOpen={isPromptLibraryOpen}
+        onClose={() => setIsPromptLibraryOpen(false)}
+        onUseTemplate={(prompt) => {
+          setGenerationOptions({
+            ...generationOptions,
+            use_custom_system_prompt: true,
+            system_prompt: prompt,
+          })
+        }}
       />
 
       <Toaster />
