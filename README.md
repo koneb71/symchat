@@ -397,6 +397,52 @@ The docker-compose.yml includes GPU support configuration that is enabled by def
 
 **Note:** GPU support significantly speeds up model inference. If you don't have an NVIDIA GPU or encounter errors, disable the GPU configuration and use CPU mode instead.
 
+**Using Local Ollama Instead of Docker:**
+
+If you already have Ollama installed on your host machine and want to use it instead of the containerized version:
+
+1. **Comment out the Ollama service** in docker-compose.yml:
+   ```yaml
+   services:
+     # Ollama Service
+     # ollama:
+     #   image: ollama/ollama:latest
+     #   container_name: symchat-ollama
+     #   ... (comment out the entire ollama service)
+   ```
+
+2. **Remove the dependency** from the frontend service in docker-compose.yml:
+   ```yaml
+   frontend:
+     build:
+       context: .
+       dockerfile: Dockerfile
+     container_name: symchat-frontend
+     restart: unless-stopped
+     ports:
+       - "3000:5173"
+     environment:
+       - VITE_OLLAMA_API_URL=http://localhost:11434
+     # Remove or comment out the depends_on section:
+     # depends_on:
+     #   ollama:
+     #     condition: service_healthy
+     networks:
+       - symchat-network
+   ```
+
+3. **Make sure Ollama is running** on your host machine:
+   ```bash
+   ollama serve
+   ```
+
+4. **Start only the frontend container:**
+   ```bash
+   docker-compose up -d frontend
+   ```
+
+**Note:** When using local Ollama, the frontend container will connect to `http://localhost:11434` which resolves to your host machine's Ollama installation.
+
 **Download Models:**
 
 **Recommended: Use the Model Manager UI**
