@@ -11,6 +11,7 @@ import { ImageUpload, type UploadedImage } from './components/ImageUpload'
 import { FileUpload, type UploadedFile } from './components/FileUpload'
 import { DocumentManager } from './components/DocumentManager'
 import { DeepResearch } from './components/DeepResearch'
+import { KeyboardShortcutsDialog } from './components/KeyboardShortcutsDialog'
 import { LogoIcon } from './components/Logo'
 import {
   GenerationSettings,
@@ -24,7 +25,9 @@ import { DatabaseService, migrateFromLocalStorage } from './lib/database'
 import { getMemoryContext } from './lib/memory-db'
 import { autoSearch, formatAutoSearchContext } from './lib/auto-search'
 import { isVisionModel, imageToBase64 } from './lib/vision'
+import { downloadConversation } from './lib/export-conversation'
 import { toast } from './hooks/use-toast'
+import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
 import { Globe, FileText, Brain } from 'lucide-react'
 import type { Conversation } from './lib/database'
 
@@ -46,6 +49,8 @@ function App() {
   const [isGenerationSettingsOpen, setIsGenerationSettingsOpen] = useState(false)
   const [isDocumentManagerOpen, setIsDocumentManagerOpen] = useState(false)
   const [isDeepResearchOpen, setIsDeepResearchOpen] = useState(false)
+  const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [ragEnabled, setRagEnabled] = useState(false)
   const [searchContext, setSearchContext] = useState<string>('')
   const [autoSearchEnabled, setAutoSearchEnabled] = useState(false)
@@ -58,6 +63,7 @@ function App() {
   )
   const abortControllerRef = useRef<AbortController | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const chatInputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     // Initialize app
@@ -135,6 +141,83 @@ function App() {
       }
     }
   }, [])
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'k',
+      ctrlKey: true,
+      description: 'New chat',
+      callback: () => {
+        createNewChat()
+      },
+    },
+    {
+      key: 'b',
+      ctrlKey: true,
+      description: 'Toggle sidebar',
+      callback: () => {
+        setIsSidebarOpen(prev => !prev)
+      },
+    },
+    {
+      key: 'e',
+      ctrlKey: true,
+      description: 'Export current conversation',
+      callback: async () => {
+        if (currentConversationId) {
+          try {
+            await downloadConversation(currentConversationId, 'markdown')
+            toast({
+              title: 'Exported',
+              description: 'Conversation exported as Markdown',
+            })
+          } catch (error) {
+            toast({
+              title: 'Export failed',
+              description: error instanceof Error ? error.message : 'Failed to export',
+              variant: 'destructive',
+            })
+          }
+        }
+      },
+    },
+    {
+      key: ',',
+      ctrlKey: true,
+      description: 'Open settings',
+      callback: () => {
+        setIsGenerationSettingsOpen(true)
+      },
+    },
+    {
+      key: 'l',
+      ctrlKey: true,
+      description: 'Focus message input',
+      callback: () => {
+        chatInputRef.current?.focus()
+      },
+    },
+    {
+      key: '?',
+      shiftKey: true,
+      description: 'Show keyboard shortcuts',
+      callback: () => {
+        setIsKeyboardShortcutsOpen(true)
+      },
+      global: true,
+    },
+    {
+      key: 'Delete',
+      ctrlKey: true,
+      description: 'Delete current conversation',
+      callback: () => {
+        if (currentConversationId) {
+          deleteConversation(currentConversationId)
+        }
+      },
+    },
+  ])
 
   const initializeApp = async () => {
     try {
@@ -914,6 +997,7 @@ function App() {
                 )}
 
                 <ChatInput
+                  ref={chatInputRef}
               onSend={handleSendMessage}
               onStop={handleStop}
               disabled={isGenerating || isAutoSearching}
@@ -1014,6 +1098,11 @@ function App() {
             description: 'Deep research results added as context',
           })
         }}
+      />
+
+      <KeyboardShortcutsDialog
+        open={isKeyboardShortcutsOpen}
+        onOpenChange={setIsKeyboardShortcutsOpen}
       />
 
       <Toaster />

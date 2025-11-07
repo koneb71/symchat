@@ -219,8 +219,10 @@ export function CodePreview({ code, language }: CodePreviewProps) {
                 <iframe
                   srcDoc={generatePreviewHtml()}
                   className="w-full h-full"
-                  sandbox="allow-scripts allow-modals"
+                  sandbox="allow-scripts allow-modals allow-forms allow-popups"
                   title="Code Preview"
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
               </div>
             )}

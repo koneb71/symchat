@@ -29,6 +29,10 @@ import {
   FileText,
   Search,
   HardDrive,
+  Download,
+  FileJson,
+  FileCode,
+  FileType,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -40,6 +44,8 @@ import {
   DropdownMenuLabel,
 } from './ui/dropdown-menu'
 import { DatabaseService } from '@/lib/database'
+import { downloadConversation } from '@/lib/export-conversation'
+import { useToast } from '@/hooks/use-toast'
 
 interface Conversation {
   id: string
@@ -82,6 +88,7 @@ export function Sidebar({
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [storageUsage, setStorageUsage] = useState<string>('0 B')
+  const { toast } = useToast()
 
   useEffect(() => {
     // Load storage usage initially and when conversations change
@@ -89,9 +96,31 @@ export function Sidebar({
       const usage = await DatabaseService.getStorageUsage()
       setStorageUsage(usage.formatted)
     }
-    
+
     loadStorageUsage()
   }, [conversations.length])
+
+  const handleExportConversation = async (
+    conversationId: string,
+    format: 'json' | 'markdown' | 'text' | 'html',
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation()
+    try {
+      await downloadConversation(conversationId, format)
+      toast({
+        title: 'Export successful',
+        description: `Conversation exported as ${format.toUpperCase()}`,
+      })
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast({
+        title: 'Export failed',
+        description: error instanceof Error ? error.message : 'Failed to export conversation',
+        variant: 'destructive',
+      })
+    }
+  }
 
   return (
     <>
@@ -222,7 +251,50 @@ export function Sidebar({
                         {conv.title}
                       </span>
                       {conv.id === currentConversationId && (
-                        <div className="ml-auto flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="ml-auto flex-shrink-0 flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                  'h-7 w-7 hover:bg-accent transition-colors',
+                                  'text-primary-foreground/70'
+                                )}
+                                title="Export conversation"
+                              >
+                                <Download className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuLabel className="text-xs">Export as</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={(e) => handleExportConversation(conv.id, 'markdown', e)}
+                              >
+                                <FileText className="h-3.5 w-3.5 mr-2" />
+                                Markdown
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => handleExportConversation(conv.id, 'html', e)}
+                              >
+                                <FileCode className="h-3.5 w-3.5 mr-2" />
+                                HTML
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => handleExportConversation(conv.id, 'text', e)}
+                              >
+                                <FileType className="h-3.5 w-3.5 mr-2" />
+                                Plain Text
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => handleExportConversation(conv.id, 'json', e)}
+                              >
+                                <FileJson className="h-3.5 w-3.5 mr-2" />
+                                JSON
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button

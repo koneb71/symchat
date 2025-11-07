@@ -232,8 +232,10 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
                 <iframe
                   srcDoc={generateCombinedHtml()}
                   className="w-full h-full"
-                  sandbox="allow-scripts allow-modals"
+                  sandbox="allow-scripts allow-modals allow-forms allow-popups"
                   title="Combined Code Preview"
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
               </div>
             )}
