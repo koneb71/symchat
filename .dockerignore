@@ -57,4 +57,4 @@ docker-compose.yml
 .editorconfig
 .eslintrc*
 .prettierrc*
-
+.cursorrules

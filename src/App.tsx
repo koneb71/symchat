@@ -199,15 +199,6 @@ function App() {
       },
     },
     {
-      key: '?',
-      shiftKey: true,
-      description: 'Show keyboard shortcuts',
-      callback: () => {
-        setIsKeyboardShortcutsOpen(true)
-      },
-      global: true,
-    },
-    {
       key: 'Delete',
       ctrlKey: true,
       description: 'Delete current conversation',
@@ -893,6 +884,7 @@ function App() {
         onOpenGenerationSettings={() => setIsGenerationSettingsOpen(true)}
         onOpenDocuments={() => setIsDocumentManagerOpen(true)}
         onOpenDeepResearch={() => setIsDeepResearchOpen(true)}
+        onOpenKeyboardShortcuts={() => setIsKeyboardShortcutsOpen(true)}
       />
 
       <div className="flex-1 flex flex-col">

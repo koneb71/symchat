@@ -1,6 +1,38 @@
+/**
+ * ChatMessage Component
+ * 
+ * Displays chat messages with rich formatting including:
+ * - Markdown rendering with GitHub Flavored Markdown (GFM) support
+ * - Syntax highlighting for 190+ programming languages via highlight.js
+ * - Code preview for web languages (HTML, CSS, JavaScript)
+ * - Image attachments and file metadata display
+ * - Typing indicators for streaming responses
+ * 
+ * Supported Programming Languages (via highlight.js):
+ * - Web: HTML, CSS, JavaScript, TypeScript, JSX, TSX, XML, JSON
+ * - Popular: Python, Java, C, C++, C#, Go, Rust, Ruby, PHP, Swift, Kotlin
+ * - Shell: Bash, PowerShell, Shell, Batch, CMD
+ * - Data: SQL, GraphQL, YAML, TOML, INI, CSV
+ * - Markup: Markdown, LaTeX, reStructuredText
+ * - Functional: Haskell, Scala, Clojure, Elixir, Erlang, F#, OCaml
+ * - JVM: Java, Kotlin, Scala, Groovy, Clojure
+ * - .NET: C#, F#, VB.NET
+ * - Systems: C, C++, Rust, Go, Zig, D, Assembly (x86, ARM)
+ * - Scripting: Python, Ruby, Perl, Lua, R
+ * - Mobile: Swift, Kotlin, Dart, Objective-C
+ * - Web Frameworks: React (JSX), Vue, Angular, Svelte
+ * - Database: SQL, PL/SQL, T-SQL, PostgreSQL, MySQL, MongoDB
+ * - DevOps: Docker, Kubernetes, Terraform, Ansible, Nginx, Apache
+ * - Other: Matlab, Fortran, COBOL, Ada, Lisp, Scheme, Prolog, Verilog, VHDL
+ * 
+ * And many more! Full list: https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
+ */
+
 import { Avatar, AvatarFallback } from './ui/avatar'
 import { Bot } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
 import { CodePreview } from './CodePreview'
 import { MultiFilePreview } from './MultiFilePreview'
 import { TypingIndicator } from './TypingIndicator'
@@ -8,6 +40,7 @@ import { FileAttachment } from './FileAttachment'
 import { cn } from '@/lib/utils'
 import type { Components } from 'react-markdown'
 import { useMemo } from 'react'
+import 'highlight.js/styles/atom-one-dark.css'
 
 interface ChatMessageProps {
   role: 'user' | 'assistant' | 'system'
@@ -60,7 +93,7 @@ export function ChatMessage({ role, content, images, files, isGenerating }: Chat
       // For inline code, just render normally
       if (inline) {
         return (
-          <code className={className} {...rest}>
+          <code className={cn('px-1.5 py-0.5 rounded-md bg-muted font-mono text-sm', className)} {...rest}>
             {children}
           </code>
         )
@@ -72,13 +105,22 @@ export function ChatMessage({ role, content, images, files, isGenerating }: Chat
       )
 
       return (
-        <div className="relative">
-          <pre className={cn('overflow-x-auto', className)}>
-            <code {...rest}>{children}</code>
+        <div className="relative my-4 rounded-lg overflow-hidden border border-border bg-[#1e1e1e]">
+          {isWebCode && (
+            <div className="absolute top-2 right-2 z-10">
+              <CodePreview code={code} language={language} />
+            </div>
+          )}
+          <pre className={cn('!m-0 overflow-x-auto p-4 !bg-[#1e1e1e]', className)} style={{ margin: 0 }}>
+            <code className={className} style={{ color: '#d4d4d4', fontSize: '14px' }} {...rest}>{children}</code>
           </pre>
-          {isWebCode && <CodePreview code={code} language={language} />}
         </div>
       )
+    },
+    pre(props) {
+      // Prevent double <pre> wrapping - react-markdown handles this
+      const { children } = props
+      return <>{children}</>
     },
   }
 
@@ -154,8 +196,14 @@ export function ChatMessage({ role, content, images, files, isGenerating }: Chat
             <TypingIndicator />
           ) : (
             <>
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown components={components}>{content}</ReactMarkdown>
+              <div className="prose prose-sm dark:prose-invert max-w-none prose-pre:p-0 prose-pre:m-0">
+                <ReactMarkdown 
+                  components={components}
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {content}
+                </ReactMarkdown>
               </div>
               {/* Show combined preview button if multiple web files detected */}
               {hasMultipleWebFiles && !isUser && (

@@ -33,6 +33,7 @@ import {
   FileJson,
   FileCode,
   FileType,
+  Keyboard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -68,6 +69,7 @@ interface SidebarProps {
   onOpenGenerationSettings: () => void
   onOpenDocuments: () => void
   onOpenDeepResearch: () => void
+  onOpenKeyboardShortcuts: () => void
 }
 
 export function Sidebar({
@@ -85,6 +87,7 @@ export function Sidebar({
   onOpenGenerationSettings,
   onOpenDocuments,
   onOpenDeepResearch,
+  onOpenKeyboardShortcuts,
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [storageUsage, setStorageUsage] = useState<string>('0 B')
@@ -155,6 +158,15 @@ export function Sidebar({
                   title={darkMode ? 'Light mode' : 'Dark mode'}
                 >
                   {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={onOpenKeyboardShortcuts}
+                  title="Keyboard Shortcuts (Shift+?)"
+                >
+                  <Keyboard className="h-4 w-4" />
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

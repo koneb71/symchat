@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Grouped by category (Navigation, Actions, General)
   - Visual keyboard key display
   - Tips and usage instructions
-- **New Documentation**: `KEYBOARD_SHORTCUTS.md`
+  - Accessible via keyboard icon button in sidebar
 - **Available Shortcuts**:
   - `Ctrl+K` - Create new chat
   - `Ctrl+B` - Toggle sidebar visibility
@@ -90,10 +90,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Ctrl+,` - Open generation settings
   - `Ctrl+L` - Focus message input
   - `Ctrl+Delete` - Delete current conversation
-  - `Shift+?` - Show keyboard shortcuts help dialog
   - `Esc` - Close modal or dialog
   - `Ctrl+Enter` - Send message (in input)
 - Modified `ChatInput.tsx` to use `forwardRef` for focus management
+- Added visible keyboard shortcuts button in sidebar header for easy access
 
 #### Memory System Consolidation (2025-01-08)
 - Removed legacy localStorage-based memory system (`src/lib/memory.ts`)
@@ -162,8 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Beautiful error UI with helpful guidance
 - Quick access to export conversations
 - Keyboard shortcuts for power users
-- Professional keyboard shortcuts help dialog
-- Improved sidebar with export functionality
+- Professional keyboard shortcuts help dialog with visible button in sidebar
+- Improved sidebar with export functionality and keyboard shortcuts access
 
 ### Fixed
 
@@ -188,6 +188,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed PDF.js worker loading error
   - Changed from CDN to local bundled worker
   - More reliable and secure
+- Fixed accessibility warnings in Dialog components
+  - Added DialogTitle elements to CodePreview and MultiFilePreview
+  - Used sr-only class for screen reader accessibility
+  - Ensures all dialogs meet WCAG standards
 
 ### Removed (2025-01-08)
 

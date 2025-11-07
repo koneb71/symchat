@@ -29,7 +29,8 @@
 - 📊 **Generation Settings** - Fine-tune AI parameters (temperature, max_tokens, top_p, top_k, repeat_penalty)
 - ⚙️ **Custom System Prompts** - Override default AI behavior with custom instructions
 - 📎 **File Attachments** - Support for multiple file types with visual previews
-- 🎯 **Markdown Support** - Rich text formatting with code syntax highlighting
+- 🎨 **Syntax Highlighting** - Beautiful code highlighting for 190+ programming languages (Python, Java, C++, Go, Rust, TypeScript, and many more)
+- 🎯 **Markdown Support** - GitHub Flavored Markdown with tables, task lists, and strikethrough
 
 ## Prerequisites
 
@@ -354,16 +355,19 @@ docker-compose down -v
 The docker-compose.yml includes GPU support configuration that is enabled by default. To use GPU acceleration with Ollama:
 
 1. **Prerequisites:**
+
    - NVIDIA GPU with CUDA support
    - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
    - Docker configured to use NVIDIA runtime
 
 2. **Verify GPU is available:**
+
    ```bash
    docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
    ```
 
 3. **The GPU configuration is already enabled in docker-compose.yml:**
+
    ```yaml
    deploy:
      resources:
@@ -375,6 +379,7 @@ The docker-compose.yml includes GPU support configuration that is enabled by def
    ```
 
 4. **To disable GPU** (use CPU only), comment out the deploy section in docker-compose.yml:
+
    ```yaml
    # Uncomment below for GPU support (NVIDIA)
    # deploy:
@@ -387,6 +392,7 @@ The docker-compose.yml includes GPU support configuration that is enabled by def
    ```
 
 5. **Verify GPU is being used:**
+
    ```bash
    # Check if Ollama detects GPU
    docker exec -it symchat-ollama nvidia-smi
@@ -402,6 +408,7 @@ The docker-compose.yml includes GPU support configuration that is enabled by def
 If you already have Ollama installed on your host machine and want to use it instead of the containerized version:
 
 1. **Comment out the Ollama service** in docker-compose.yml:
+
    ```yaml
    services:
      # Ollama Service
@@ -412,6 +419,7 @@ If you already have Ollama installed on your host machine and want to use it ins
    ```
 
 2. **Remove the dependency** from the frontend service in docker-compose.yml:
+
    ```yaml
    frontend:
      build:
@@ -432,6 +440,7 @@ If you already have Ollama installed on your host machine and want to use it ins
    ```
 
 3. **Make sure Ollama is running** on your host machine:
+
    ```bash
    ollama serve
    ```

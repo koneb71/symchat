@@ -58,3 +58,151 @@
   }
 }
 
+/* Syntax Highlighting - VS Code Dark+ Theme (High Readability) */
+@layer components {
+  /* Override highlight.js completely with VS Code Dark+ colors */
+  .hljs,
+  .hljs * {
+    color: #d4d4d4 !important;
+    background: transparent !important;
+  }
+
+  /* Keywords - Bright Blue (def, import, return, if, else) */
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-literal,
+  .hljs-section {
+    color: #569cd6 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Strings - Orange (all strings) */
+  .hljs-string,
+  .hljs-symbol,
+  .hljs-bullet,
+  .hljs-addition,
+  .hljs-template-tag,
+  .hljs-template-variable {
+    color: #ce9178 !important;
+  }
+
+  /* Function & Class Names - Yellow */
+  .hljs-title,
+  .hljs-name,
+  .hljs-function > .hljs-title {
+    color: #dcdcaa !important;
+    font-weight: 600 !important;
+  }
+
+  /* Types & Classes - Bright Green */
+  .hljs-type,
+  .hljs-class .hljs-title,
+  .hljs-built_in,
+  .hljs-builtin-name {
+    color: #4ec9b0 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Variables - Light Blue */
+  .hljs-variable,
+  .hljs-subst {
+    color: #9cdcfe !important;
+  }
+
+  /* Numbers - Light Green */
+  .hljs-number {
+    color: #b5cea8 !important;
+  }
+
+  /* Attributes & Parameters - Light Blue */
+  .hljs-attribute,
+  .hljs-attr,
+  .hljs-params {
+    color: #9cdcfe !important;
+  }
+
+  /* Special Keywords - Purple (True, False, None) */
+  .hljs-literal {
+    color: #569cd6 !important;
+  }
+
+  /* Comments - Green */
+  .hljs-comment,
+  .hljs-quote {
+    color: #6a9955 !important;
+    font-style: italic !important;
+  }
+
+  /* Meta & Doctags - Gray */
+  .hljs-meta,
+  .hljs-doctag {
+    color: #808080 !important;
+  }
+
+  /* Links & URLs */
+  .hljs-link {
+    color: #569cd6 !important;
+    text-decoration: underline;
+  }
+
+  /* Operators & Punctuation */
+  .hljs-operator,
+  .hljs-punctuation {
+    color: #d4d4d4 !important;
+  }
+
+  /* Regexp - Red-Orange */
+  .hljs-regexp {
+    color: #d16969 !important;
+  }
+
+  /* Deletions - Red */
+  .hljs-deletion {
+    color: #f44747 !important;
+  }
+
+  /* Selector attributes */
+  .hljs-selector-attr,
+  .hljs-selector-pseudo {
+    color: #d7ba7d !important;
+  }
+
+  /* Force proper display */
+  .hljs {
+    display: block !important;
+    overflow-x: auto !important;
+    padding: 0 !important;
+  }
+
+  /* Inline code styling */
+  :not(pre) > code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+    font-size: 0.9em !important;
+    background: rgba(110, 118, 129, 0.4) !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 3px !important;
+    color: #ce9178 !important;
+  }
+
+  /* Code block font - Make it bigger and more readable */
+  pre code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0px !important;
+  }
+
+  /* Ensure code blocks have good padding */
+  pre {
+    margin: 0 !important;
+    padding: 1rem !important;
+  }
+
+  /* Make sure all text is visible */
+  code, pre, .hljs {
+    text-shadow: none !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+}
+

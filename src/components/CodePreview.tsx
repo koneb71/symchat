@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Dialog, DialogContent } from './ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Eye, Code, Maximize2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
@@ -173,6 +173,7 @@ export function CodePreview({ code, language }: CodePreviewProps) {
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="w-screen h-screen max-w-none max-h-none flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+          <DialogTitle className="sr-only">{getLanguageLabel()} Preview - Live rendering in secure sandbox</DialogTitle>
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur-sm border-b shadow-sm">
             <div className="flex items-center gap-3">

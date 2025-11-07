@@ -36,7 +36,6 @@ export function KeyboardShortcutsDialog({
 
     // General
     { keys: 'Esc', description: 'Close modal or dialog', category: 'General' },
-    { keys: 'Shift+?', description: 'Show keyboard shortcuts', category: 'General' },
   ]
 
   // Group shortcuts by category
@@ -90,7 +89,7 @@ export function KeyboardShortcutsDialog({
 
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            <strong>Tip:</strong> Press <kbd className="px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 rounded border border-blue-300 dark:border-blue-700">Shift+?</kbd> anytime to show this dialog.
+            <strong>Tip:</strong> Click the <Keyboard className="inline h-3.5 w-3.5 mx-1" /> keyboard icon in the sidebar to show this dialog anytime.
           </p>
         </div>
       </DialogContent>
