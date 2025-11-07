@@ -3,11 +3,12 @@ import mammoth from 'mammoth'
 import ExcelJS from 'exceljs'
 import Papa from 'papaparse'
 
-// Configure PDF.js worker
-// Use a CDN version or bundled worker to avoid MIME type issues
+// Configure PDF.js worker - use the local bundled version
 if (typeof window !== 'undefined') {
-  // Use a more reliable CDN worker
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.394/pdf.worker.min.mjs`
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+  ).toString()
 }
 
 export interface PDFDocument {

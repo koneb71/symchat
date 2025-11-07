@@ -349,6 +349,54 @@ docker-compose down
 docker-compose down -v
 ```
 
+**GPU Support (NVIDIA):**
+
+The docker-compose.yml includes GPU support configuration that is enabled by default. To use GPU acceleration with Ollama:
+
+1. **Prerequisites:**
+   - NVIDIA GPU with CUDA support
+   - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
+   - Docker configured to use NVIDIA runtime
+
+2. **Verify GPU is available:**
+   ```bash
+   docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
+   ```
+
+3. **The GPU configuration is already enabled in docker-compose.yml:**
+   ```yaml
+   deploy:
+     resources:
+       reservations:
+         devices:
+           - driver: nvidia
+             count: 1
+             capabilities: [gpu]
+   ```
+
+4. **To disable GPU** (use CPU only), comment out the deploy section in docker-compose.yml:
+   ```yaml
+   # Uncomment below for GPU support (NVIDIA)
+   # deploy:
+   #   resources:
+   #     reservations:
+   #       devices:
+   #         - driver: nvidia
+   #           count: 1
+   #           capabilities: [gpu]
+   ```
+
+5. **Verify GPU is being used:**
+   ```bash
+   # Check if Ollama detects GPU
+   docker exec -it symchat-ollama nvidia-smi
+
+   # Pull a model and it should use GPU
+   docker exec -it symchat-ollama ollama pull llama3.2
+   ```
+
+**Note:** GPU support significantly speeds up model inference. If you don't have an NVIDIA GPU or encounter errors, disable the GPU configuration and use CPU mode instead.
+
 **Download Models:**
 
 **Recommended: Use the Model Manager UI**

@@ -1,5 +1,5 @@
-# Stage 1: Build the application
-FROM node:25-alpine AS builder
+# Development Dockerfile
+FROM node:25-alpine
 
 # Set working directory
 WORKDIR /app
@@ -13,21 +13,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Expose Vite dev server port
+EXPOSE 5173
 
-# Stage 2: Production image with Nginx
-FROM nginx:alpine
-
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
-
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

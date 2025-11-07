@@ -10,20 +10,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // optimizeDeps: {
-  //   exclude: ['pdfjs-dist'],
-  // },
-  // build: {
-  //   rollupOptions: {
-  //     output: {
-  //       manualChunks: {
-  //         'pdfjs-dist': ['pdfjs-dist'],
-  //       },
-  //     },
-  //   },
-  // },
-  // worker: {
-  //   format: "es",
-  // },
-  // assetsInclude: ["**/*.mjs"],
+  optimizeDeps: {
+    exclude: ["pdfjs-dist"],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "pdfjs-dist": ["pdfjs-dist"],
+        },
+      },
+    },
+  },
+  worker: {
+    format: "es",
+  },
+  assetsInclude: ["public/*.mjs"],
 });
