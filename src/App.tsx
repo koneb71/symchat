@@ -62,10 +62,12 @@ function App() {
   useEffect(() => {
     // Initialize app
     initializeApp()
-    
+
     // Check for documents and auto-enable RAG
     checkAndEnableRAG()
+  }, [])
 
+  useEffect(() => {
     // Add paste event listener for images
     const handlePaste = async (e: ClipboardEvent) => {
       const items = e.clipboardData?.items
@@ -73,7 +75,7 @@ function App() {
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i]
-        
+
         if (item.type.startsWith('image/')) {
           e.preventDefault()
           const file = item.getAsFile()
@@ -82,7 +84,7 @@ function App() {
             const namedFile = new File([file], `pasted-image-${Date.now()}.png`, {
               type: file.type,
             })
-            
+
         // Add to uploaded images directly
         const preview = URL.createObjectURL(namedFile)
         const isVision = isVisionModel(selectedModel)
@@ -116,7 +118,7 @@ function App() {
     return () => {
       document.removeEventListener('paste', handlePaste)
     }
-  }, [])
+  }, [selectedModel])
 
   useEffect(() => {
     // Auto-scroll to bottom when messages change
@@ -124,6 +126,15 @@ function App() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, currentResponse])
+
+  useEffect(() => {
+    // Cleanup: abort any ongoing generation when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
 
   const initializeApp = async () => {
     try {
@@ -684,7 +695,10 @@ function App() {
     const newMessages = [...messages, userMessage]
     setMessages(newMessages)
 
-    // Clear uploaded images and files after sending
+    // Clear uploaded images and files after sending (with proper cleanup)
+    uploadedImages.forEach(img => {
+      URL.revokeObjectURL(img.preview)
+    })
     setUploadedImages([])
     setUploadedFiles([])
 

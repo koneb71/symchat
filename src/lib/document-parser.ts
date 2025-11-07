@@ -283,6 +283,11 @@ function extractPageNumber(text: string): number {
   return match ? parseInt(match[1]) : 0
 }
 
+// Helper function to escape regex special characters
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 // Simple keyword-based search in chunks
 export function searchChunks(
   chunks: DocumentChunk[],
@@ -290,20 +295,22 @@ export function searchChunks(
   topK: number = 5
 ): DocumentChunk[] {
   const queryWords = query.toLowerCase().split(/\s+/)
-  
+
   // Score each chunk based on keyword matches
   const scoredChunks = chunks.map(chunk => {
     const chunkText = chunk.text.toLowerCase()
     let score = 0
-    
+
     queryWords.forEach(word => {
-      const count = (chunkText.match(new RegExp(word, 'g')) || []).length
+      // Escape regex special characters to prevent injection
+      const escapedWord = escapeRegExp(word)
+      const count = (chunkText.match(new RegExp(escapedWord, 'g')) || []).length
       score += count
     })
-    
+
     return { chunk, score }
   })
-  
+
   // Sort by score and return top K
   return scoredChunks
     .filter(sc => sc.score > 0)

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useCallback } from 'react'
 import * as React from 'react'
 import { Button } from './ui/button'
 import { X, FileText, Loader2, Upload } from 'lucide-react'
@@ -22,6 +22,12 @@ interface ImageUploadProps {
 
 export function ImageUpload({ images, onImagesChange, disabled, skipOCR }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const imagesRef = useRef<UploadedImage[]>(images)
+
+  // Keep ref in sync with images prop
+  React.useEffect(() => {
+    imagesRef.current = images
+  }, [images])
 
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +86,7 @@ export function ImageUpload({ images, onImagesChange, disabled, skipOCR }: Image
     }
   }
 
-  const performOCR = async (imageData: UploadedImage) => {
+  const performOCR = useCallback(async (imageData: UploadedImage) => {
     try {
       const result = await Tesseract.recognize(imageData.file, 'eng', {
         logger: (m) => {
@@ -94,12 +100,14 @@ export function ImageUpload({ images, onImagesChange, disabled, skipOCR }: Image
       const extractedText = result.data.text.trim()
 
       // Update the image with extracted text
-      const updated = images.map((img) =>
-        img.id === imageData.id
-          ? { ...img, extractedText, isProcessing: false }
-          : img
+      // Use imagesRef.current to get the latest images array
+      onImagesChange(
+        imagesRef.current.map((img: UploadedImage) =>
+          img.id === imageData.id
+            ? { ...img, extractedText, isProcessing: false }
+            : img
+        )
       )
-      onImagesChange(updated)
 
       if (extractedText) {
         toast({
@@ -114,19 +122,21 @@ export function ImageUpload({ images, onImagesChange, disabled, skipOCR }: Image
       }
     } catch (error) {
       console.error('OCR error:', error)
-      const updated = images.map((img) =>
-        img.id === imageData.id
-          ? { ...img, isProcessing: false, extractedText: '[OCR failed]' }
-          : img
+      // Update with error state using latest images from ref
+      onImagesChange(
+        imagesRef.current.map((img: UploadedImage) =>
+          img.id === imageData.id
+            ? { ...img, isProcessing: false, extractedText: '[OCR failed]' }
+            : img
+        )
       )
-      onImagesChange(updated)
       toast({
         title: 'OCR Failed',
         description: 'Failed to extract text from image',
         variant: 'destructive',
       })
     }
-  }
+  }, [onImagesChange])
 
   const removeImage = (id: string) => {
     const imageToRemove = images.find((img) => img.id === id)

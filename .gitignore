@@ -159,4 +159,5 @@ stats.html
 *.tar.gz
 *.rar
 *.7z
+.claude/
 
