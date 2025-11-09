@@ -35,6 +35,7 @@ import {
   FileCode,
   FileType,
   Keyboard,
+  Server,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -72,6 +73,7 @@ interface SidebarProps {
   onOpenDeepResearch: () => void;
   onOpenKeyboardShortcuts: () => void;
   onOpenPromptLibrary: () => void;
+  onOpenLLMProviderSettings: () => void;
 }
 
 export function Sidebar({
@@ -91,6 +93,7 @@ export function Sidebar({
   onOpenDeepResearch,
   onOpenKeyboardShortcuts,
   onOpenPromptLibrary,
+  onOpenLLMProviderSettings,
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [storageUsage, setStorageUsage] = useState<string>("0 B");
@@ -277,7 +280,11 @@ export function Sidebar({
                     </DropdownMenuLabel>
                     <DropdownMenuItem onClick={onOpenModelManager}>
                       <Package className="h-4 w-4 mr-2" />
-                      Model Manager
+                      Model Manager (Ollama)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onOpenLLMProviderSettings}>
+                      <Server className="h-4 w-4 mr-2" />
+                      Backend Settings
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={onOpenDocuments}>
                       <FileText className="h-4 w-4 mr-2" />

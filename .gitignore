@@ -96,6 +96,11 @@ docker-compose.override.yml
 *.db-shm
 *.db-wal
 
+# LLM Models (GGUF files are large)
+models/*.gguf
+models/*.bin
+!models/.gitkeep
+
 # Backups
 backup/
 backups/

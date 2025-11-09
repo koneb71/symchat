@@ -1,7 +1,5 @@
-version: "3.8"
-
 services:
-  # Ollama Service
+  # Ollama Service (Local LLM Server)
   ollama:
     image: ollama/ollama:latest
     container_name: symchat-ollama
@@ -20,14 +18,34 @@ services:
     #         - driver: nvidia
     #           count: 1
     #           capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     networks:
       - symchat-network
+
+  # llama.cpp Server
+  # llamacpp:
+  #   image: ghcr.io/ggerganov/llama.cpp:server
+  #   container_name: symchat-llamacpp
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./models:/root/.cache/llama.cpp
+  #   command: >
+  #     --host 0.0.0.0
+  #     --port 8080
+  #     -hf ggml-org/gemma-3-1b-it-GGUF
+  #     -c 4096
+  #     -ngl 35
+  #   # Uncomment below for GPU support (NVIDIA)
+  #   # deploy:
+  #   #   resources:
+  #   #     reservations:
+  #   #       devices:
+  #   #         - driver: nvidia
+  #   #           count: 1
+  #   #           capabilities: [gpu]
+  #   networks:
+  #     - symchat-network
 
   # SymChat Frontend
   frontend:

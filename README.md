@@ -8,12 +8,12 @@
 ### Core Features
 
 - 🎨 **Beautiful Modern UI** - Clean and intuitive interface with dark mode support
-- 💬 **Real-time Chat** - Stream responses from Ollama models in real-time
+- 💬 **Real-time Chat** - Stream responses from Ollama and llama.cpp models in real-time
 - 🧠 **Memory System** - AI remembers your preferences and context across conversations
 - 💾 **Local Database** - IndexedDB for fast, local-first data storage (no server needed!)
 - 📝 **Conversation History** - Save and manage multiple chat conversations
 - 📦 **Model Manager** - Download, view, and manage Ollama models from the UI
-- 🤖 **Model Selection** - Choose from available Ollama models
+- 🤖 **Model Selection** - Choose from available Ollama and llama.cpp models
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
 - 🌙 **Dark Mode** - Eye-friendly dark theme
 - 📤 **Export/Import** - Backup and restore your data anytime
@@ -32,10 +32,18 @@
 - 🎨 **Syntax Highlighting** - Beautiful code highlighting for 190+ programming languages (Python, Java, C++, Go, Rust, TypeScript, and many more)
 - 🎯 **Markdown Support** - GitHub Flavored Markdown with tables, task lists, and strikethrough
 
+### LLM Backend Support
+
+- 🖥️ **Ollama** - Native Ollama API with full model management (default)
+- 🔌 **llama.cpp** - Optional OpenAI-compatible backend for GGUF models
+- 🔄 **Multi-Backend** - Use both simultaneously, models from both appear in selector
+- ⚙️ **Easy Configuration** - Simple toggle to enable/disable llama.cpp in Backend Settings
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher)
 - [Ollama](https://ollama.ai/) installed and running
+- (Optional) [llama.cpp](https://github.com/ggerganov/llama.cpp) for GGUF model support
 
 ## Quick Start
 
@@ -205,6 +213,55 @@ Download and manage Ollama models directly from the UI!
 
 📖 **[MODEL_MANAGER_QUICKSTART.md](MODEL_MANAGER_QUICKSTART.md)** | **[MODEL_MANAGER_GUIDE.md](MODEL_MANAGER_GUIDE.md)**
 
+## llama.cpp Backend (Optional)
+
+Use GGUF models directly with llama.cpp as an alternative or additional backend!
+
+**Features:**
+
+- 🔌 **GGUF Support** - Direct support for GGUF quantized models
+- 🚀 **Lightweight** - No model conversion needed
+- 🔄 **Multi-Backend** - Run alongside Ollama, models from both appear together
+- ⚡ **GPU Acceleration** - Full NVIDIA CUDA support
+- 🎯 **Simple Setup** - One-click toggle in Backend Settings
+
+**How to Use:**
+
+**Option 1: Docker (Recommended)**
+
+1. Uncomment llama.cpp service in `docker-compose.yml` (lines 24-48)
+2. Run: `docker-compose up -d`
+3. Auto-downloads Gemma 3 1B model on first start
+4. Enable in UI: Settings → Backend Settings → Toggle llama.cpp ON
+
+**Option 2: Manual (Advanced)**
+
+1. Run llama.cpp locally:
+   ```bash
+   ./llama-server -m model.gguf --host 0.0.0.0 --port 8080
+   ```
+2. Enable in UI: Settings → Backend Settings → Toggle llama.cpp ON
+3. Set URL to `http://localhost:8080`
+
+**Features:**
+
+- ✅ Static model loading (restart to change models)
+- ✅ Multi-user safe (no interruptions)
+- ✅ Supports multiple concurrent requests
+- ✅ Models appear with 🔌 icon in selector
+- ✅ Automatic routing to correct backend
+
+**Model Icons:**
+
+- 🖥️ **Ollama models** - Show Cpu icon
+- 🔌 **llama.cpp models** - Show Server icon
+
+**Configuration:**
+
+- **Backend Settings**: Toggle llama.cpp on/off, configure URLs
+- **Docker**: Optional GPU support in `docker-compose.yml`
+- **Default Model**: Change `-hf` flag in docker-compose.yml
+
 ## Code Preview
 
 Preview HTML, CSS, and JavaScript code directly in the chat!
@@ -282,7 +339,8 @@ sympchat/
 
 ### AI & LLM
 
-- **Ollama** - Local LLM inference
+- **Ollama** - Local LLM inference (default backend)
+- **llama.cpp** - Optional GGUF model backend
 - **IndexedDB** - Local database (via Dexie.js)
 
 ### Document Processing

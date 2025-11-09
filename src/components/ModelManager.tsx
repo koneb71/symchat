@@ -17,11 +17,10 @@ import {
 } from './ui/alert-dialog'
 import { toast } from '@/hooks/use-toast'
 import {
-  listModels,
   pullModel,
   deleteModel,
-  type OllamaModel,
 } from '@/lib/ollama'
+import { listLLMModels, type LLMModel } from '@/lib/llm-provider'
 import { Download, Trash2, Package, Loader2, Search, Eye, HardDrive, Calendar, X } from 'lucide-react'
 import { Progress } from './ui/progress'
 
@@ -31,7 +30,7 @@ interface ModelManagerProps {
 }
 
 export function ModelManager({ isOpen, onClose }: ModelManagerProps) {
-  const [installedModels, setInstalledModels] = useState<OllamaModel[]>([])
+  const [installedModels, setInstalledModels] = useState<LLMModel[]>([])
   const [modelName, setModelName] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [downloadingModel, setDownloadingModel] = useState<string | null>(null)
@@ -39,7 +38,6 @@ export function ModelManager({ isOpen, onClose }: ModelManagerProps) {
     status: string
     percent: number
   } | null>(null)
-
   useEffect(() => {
     if (isOpen) {
       loadModels()
@@ -48,7 +46,7 @@ export function ModelManager({ isOpen, onClose }: ModelManagerProps) {
 
   const loadModels = async () => {
     try {
-      const models = await listModels()
+      const models = await listLLMModels()
       setInstalledModels(models)
     } catch (error) {
       console.error('Failed to load models:', error)

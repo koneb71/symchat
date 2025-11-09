@@ -5,6 +5,7 @@ import { ChatInput } from "./components/ChatInput";
 import { ModelSelector } from "./components/ModelSelector";
 import { MemoryManager } from "./components/MemoryManager";
 import { ModelManager } from "./components/ModelManager";
+import { LLMProviderSettings } from "./components/LLMProviderSettings";
 import { DataExport } from "./components/DataExport";
 import { SearchSettings } from "./components/SearchSettings";
 import { ImageUpload, type UploadedImage } from "./components/ImageUpload";
@@ -27,7 +28,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./components/ui/tooltip";
-import { chatStream, type ChatMessage as ChatMessageType } from "./lib/ollama";
+import { type ChatMessage as ChatMessageType } from "./lib/ollama";
+import { llmChatStream } from "./lib/llm-provider";
 import { DatabaseService, migrateFromLocalStorage } from "./lib/database";
 import { getMemoryContext } from "./lib/memory-db";
 import { autoSearch, formatAutoSearchContext } from "./lib/auto-search";
@@ -49,6 +51,9 @@ function App() {
   >(null);
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
+  const [selectedModelProvider, setSelectedModelProvider] = useState<
+    "ollama" | "llamacpp"
+  >("ollama");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentResponse, setCurrentResponse] = useState("");
   const [isMemoryManagerOpen, setIsMemoryManagerOpen] = useState(false);
@@ -58,6 +63,8 @@ function App() {
   const [isGenerationSettingsOpen, setIsGenerationSettingsOpen] =
     useState(false);
   const [isDocumentManagerOpen, setIsDocumentManagerOpen] = useState(false);
+  const [isLLMProviderSettingsOpen, setIsLLMProviderSettingsOpen] =
+    useState(false);
   const [isDeepResearchOpen, setIsDeepResearchOpen] = useState(false);
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false);
   const [isPromptLibraryOpen, setIsPromptLibraryOpen] = useState(false);
@@ -900,19 +907,22 @@ The <thinking> section will be displayed in a collapsible block so users can see
       abortControllerRef.current = new AbortController();
       let fullResponse = "";
 
-      for await (const chunk of chatStream({
-        model: selectedModel,
-        messages: messagesToSend,
-        images: imageData, // Include images for vision models
-        signal: abortControllerRef.current.signal,
-        options: {
-          temperature: generationOptions.temperature,
-          num_predict: generationOptions.max_tokens,
-          top_p: generationOptions.top_p,
-          top_k: generationOptions.top_k,
-          repeat_penalty: generationOptions.repeat_penalty,
+      for await (const chunk of llmChatStream(
+        {
+          model: selectedModel,
+          messages: messagesToSend,
+          images: imageData, // Include images for vision models
+          signal: abortControllerRef.current.signal,
+          options: {
+            temperature: generationOptions.temperature,
+            num_predict: generationOptions.max_tokens,
+            top_p: generationOptions.top_p,
+            top_k: generationOptions.top_k,
+            repeat_penalty: generationOptions.repeat_penalty,
+          },
         },
-      })) {
+        selectedModelProvider
+      )) {
         fullResponse += chunk;
         setCurrentResponse(fullResponse);
       }
@@ -1080,6 +1090,7 @@ The <thinking> section will be displayed in a collapsible block so users can see
         onOpenDocuments={() => setIsDocumentManagerOpen(true)}
         onOpenDeepResearch={() => setIsDeepResearchOpen(true)}
         onOpenKeyboardShortcuts={() => setIsKeyboardShortcutsOpen(true)}
+        onOpenLLMProviderSettings={() => setIsLLMProviderSettingsOpen(true)}
         onOpenPromptLibrary={() => setIsPromptLibraryOpen(true)}
       />
 
@@ -1099,7 +1110,10 @@ The <thinking> section will be displayed in a collapsible block so users can see
               </div>
               <ModelSelector
                 selectedModel={selectedModel}
-                onModelChange={setSelectedModel}
+                onModelChange={(model, provider) => {
+                  setSelectedModel(model);
+                  setSelectedModelProvider(provider);
+                }}
                 onNoModels={() => setIsModelManagerOpen(true)}
               />
             </div>
@@ -1299,6 +1313,18 @@ The <thinking> section will be displayed in a collapsible block so users can see
       <SearchSettings
         isOpen={isSearchSettingsOpen}
         onClose={() => setIsSearchSettingsOpen(false)}
+      />
+
+      <LLMProviderSettings
+        isOpen={isLLMProviderSettingsOpen}
+        onClose={() => setIsLLMProviderSettingsOpen(false)}
+        onProviderChange={() => {
+          // Reload models when provider changes
+          toast({
+            title: "Backend Changed",
+            description: "Please refresh models in Model Manager",
+          });
+        }}
       />
 
       <GenerationSettings

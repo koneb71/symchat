@@ -1,0 +1,4 @@
+# This directory stores GGUF models for llama.cpp
+# Model files are excluded from git due to their large size
+# Download models via the UI (Model Manager - llama.cpp) or manually from HuggingFace
+
