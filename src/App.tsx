@@ -692,6 +692,29 @@ function App() {
       systemContext += generationOptions.system_prompt + "\n\n";
     }
 
+    // Add thinking process instruction if enabled
+    if (generationOptions.show_thinking) {
+      systemContext += `IMPORTANT: Before providing your final answer, show your thinking process in a dedicated section.
+
+Format your response EXACTLY like this:
+
+<thinking>
+[Your step-by-step reasoning, analysis, and thought process here]
+- Break down the problem
+- Consider different angles
+- Work through the logic
+- Note any assumptions or uncertainties
+</thinking>
+
+<answer>
+[Your clear, final answer here]
+</answer>
+
+The <thinking> section will be displayed in a collapsible block so users can see your reasoning process.
+
+`;
+    }
+
     if (memoryContext) {
       systemContext += memoryContext;
     }
