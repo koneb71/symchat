@@ -27,6 +27,7 @@ export interface GenerationOptions {
   repeat_penalty: number;
   system_prompt: string;
   use_custom_system_prompt: boolean;
+  show_thinking: boolean;
 }
 
 interface GenerationSettingsProps {
@@ -45,6 +46,7 @@ const DEFAULT_OPTIONS: GenerationOptions = {
   repeat_penalty: 1.1,
   system_prompt: "",
   use_custom_system_prompt: false,
+  show_thinking: false,
 };
 
 export function GenerationSettings({
@@ -322,6 +324,34 @@ export function GenerationSettings({
                   className="font-mono text-sm"
                 />
               </>
+            )}
+          </div>
+
+          {/* Show Thinking */}
+          <div className="space-y-3 pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label htmlFor="show_thinking" className="font-semibold">
+                  Show Thinking Process
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Display AI's reasoning before final answer
+                </p>
+              </div>
+              <Switch
+                id="show_thinking"
+                checked={localOptions.show_thinking}
+                onCheckedChange={(checked) =>
+                  updateOption("show_thinking", checked)
+                }
+              />
+            </div>
+            {localOptions.show_thinking && (
+              <p className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md border border-blue-200 dark:border-blue-900">
+                💡 The AI will show its step-by-step reasoning process in a
+                collapsible section before providing the final answer. This
+                helps you understand how it arrived at its conclusion.
+              </p>
             )}
           </div>
         </div>

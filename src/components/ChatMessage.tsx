@@ -29,7 +29,7 @@
  */
 
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Bot } from "lucide-react";
+import { Bot, ChevronDown, ChevronRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -40,7 +40,7 @@ import { FileAttachment } from "./FileAttachment";
 import { MessageActions } from "./MessageActions";
 import { cn } from "@/lib/utils";
 import type { Components } from "react-markdown";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import "highlight.js/styles/atom-one-dark.css";
 
 interface ChatMessageProps {
@@ -98,6 +98,28 @@ export function ChatMessage({
     );
     return webLanguages.length > 1;
   }, [codeBlocks]);
+
+  // Parse thinking and answer sections
+  const { thinkingContent, answerContent, hasThinking } = useMemo(() => {
+    const thinkingMatch = content.match(/<thinking>([\s\S]*?)<\/thinking>/i);
+    const answerMatch = content.match(/<answer>([\s\S]*?)<\/answer>/i);
+
+    if (thinkingMatch && answerMatch) {
+      return {
+        thinkingContent: thinkingMatch[1].trim(),
+        answerContent: answerMatch[1].trim(),
+        hasThinking: true,
+      };
+    }
+
+    return {
+      thinkingContent: "",
+      answerContent: content,
+      hasThinking: false,
+    };
+  }, [content]);
+
+  const [isThinkingExpanded, setIsThinkingExpanded] = useState(false);
 
   // Custom components for ReactMarkdown to add code preview
   const components: Components = {
@@ -271,6 +293,52 @@ export function ChatMessage({
           <TypingIndicator />
         ) : (
           <>
+            {/* Thinking section (collapsible) */}
+            {hasThinking && !isUser && (
+              <div className="mb-4">
+                <button
+                  onClick={() => setIsThinkingExpanded(!isThinkingExpanded)}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200 dark:border-purple-800 hover:from-purple-100 hover:to-blue-100 dark:hover:from-purple-950/50 dark:hover:to-blue-950/50 transition-all"
+                >
+                  {isThinkingExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  )}
+                  <Lightbulb className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <span className="font-semibold text-sm text-purple-900 dark:text-purple-100">
+                    Thinking Process
+                  </span>
+                  <span className="text-xs text-purple-600 dark:text-purple-400 ml-auto">
+                    {isThinkingExpanded ? "Hide" : "Show"} reasoning
+                  </span>
+                </button>
+                {isThinkingExpanded && (
+                  <div className="mt-2 p-4 rounded-lg bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                    <div
+                      className="prose prose-sm dark:prose-invert max-w-none 
+                      prose-pre:p-0 prose-pre:m-0 
+                      prose-p:my-2 prose-p:leading-relaxed prose-p:text-purple-700 dark:prose-p:text-purple-300
+                      prose-headings:text-purple-900 dark:prose-headings:text-purple-100
+                      prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-li:text-purple-700 dark:prose-li:text-purple-300
+                      prose-strong:text-purple-900 dark:prose-strong:text-purple-100
+                      prose-code:text-purple-600 dark:prose-code:text-purple-400
+                      "
+                    >
+                      <ReactMarkdown
+                        components={components}
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeHighlight]}
+                      >
+                        {thinkingContent}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Answer section */}
             <div
               className="prose prose-sm dark:prose-invert max-w-none 
               prose-pre:p-0 prose-pre:m-0 
@@ -297,7 +365,7 @@ export function ChatMessage({
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeHighlight]}
               >
-                {content}
+                {answerContent}
               </ReactMarkdown>
             </div>
             {/* Show combined preview button if multiple web files detected */}
