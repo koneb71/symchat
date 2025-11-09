@@ -1,39 +1,40 @@
-import { useState } from 'react'
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog'
-import { Button } from './ui/button'
-import { Label } from './ui/label'
-import { Slider } from './ui/slider'
-import { Textarea } from './ui/textarea'
-import { Switch } from './ui/switch'
-import { RotateCcw, Info } from 'lucide-react'
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Slider } from "./ui/slider";
+import { Textarea } from "./ui/textarea";
+import { Switch } from "./ui/switch";
+import { RotateCcw, Info, FileCode } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from './ui/tooltip'
+} from "./ui/tooltip";
 
 export interface GenerationOptions {
-  temperature: number
-  max_tokens: number
-  top_p: number
-  top_k: number
-  repeat_penalty: number
-  system_prompt: string
-  use_custom_system_prompt: boolean
+  temperature: number;
+  max_tokens: number;
+  top_p: number;
+  top_k: number;
+  repeat_penalty: number;
+  system_prompt: string;
+  use_custom_system_prompt: boolean;
 }
 
 interface GenerationSettingsProps {
-  isOpen: boolean
-  onClose: () => void
-  options: GenerationOptions
-  onOptionsChange: (options: GenerationOptions) => void
+  isOpen: boolean;
+  onClose: () => void;
+  options: GenerationOptions;
+  onOptionsChange: (options: GenerationOptions) => void;
+  onOpenPromptLibrary?: () => void;
 }
 
 const DEFAULT_OPTIONS: GenerationOptions = {
@@ -42,33 +43,41 @@ const DEFAULT_OPTIONS: GenerationOptions = {
   top_p: 0.9,
   top_k: 40,
   repeat_penalty: 1.1,
-  system_prompt: '',
+  system_prompt: "",
   use_custom_system_prompt: false,
-}
+};
 
 export function GenerationSettings({
   isOpen,
   onClose,
   options,
   onOptionsChange,
+  onOpenPromptLibrary,
 }: GenerationSettingsProps) {
-  const [localOptions, setLocalOptions] = useState<GenerationOptions>(options)
+  const [localOptions, setLocalOptions] = useState<GenerationOptions>(options);
+
+  // Sync local state when props change or dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setLocalOptions(options);
+    }
+  }, [isOpen, options]);
 
   const handleSave = () => {
-    onOptionsChange(localOptions)
-    onClose()
-  }
+    onOptionsChange(localOptions);
+    onClose();
+  };
 
   const handleReset = () => {
-    setLocalOptions(DEFAULT_OPTIONS)
-  }
+    setLocalOptions(DEFAULT_OPTIONS);
+  };
 
   const updateOption = <K extends keyof GenerationOptions>(
     key: K,
     value: GenerationOptions[K]
   ) => {
-    setLocalOptions((prev) => ({ ...prev, [key]: value }))
-  }
+    setLocalOptions((prev) => ({ ...prev, [key]: value }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -93,8 +102,13 @@ export function GenerationSettings({
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
-                    <p>Controls randomness. Lower = more focused, higher = more creative</p>
-                    <p className="text-xs mt-1">Range: 0.0 (deterministic) to 2.0 (very random)</p>
+                    <p>
+                      Controls randomness. Lower = more focused, higher = more
+                      creative
+                    </p>
+                    <p className="text-xs mt-1">
+                      Range: 0.0 (deterministic) to 2.0 (very random)
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -105,7 +119,7 @@ export function GenerationSettings({
               max={2}
               step={0.1}
               value={[localOptions.temperature]}
-              onValueChange={(value) => updateOption('temperature', value[0])}
+              onValueChange={(value) => updateOption("temperature", value[0])}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -128,7 +142,9 @@ export function GenerationSettings({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p>Maximum length of the response</p>
-                    <p className="text-xs mt-1">Higher values allow longer responses but take more time</p>
+                    <p className="text-xs mt-1">
+                      Higher values allow longer responses but take more time
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -139,7 +155,7 @@ export function GenerationSettings({
               max={8192}
               step={128}
               value={[localOptions.max_tokens]}
-              onValueChange={(value) => updateOption('max_tokens', value[0])}
+              onValueChange={(value) => updateOption("max_tokens", value[0])}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -161,8 +177,13 @@ export function GenerationSettings({
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
-                    <p>Considers only tokens with cumulative probability above this threshold</p>
-                    <p className="text-xs mt-1">Lower = more focused, higher = more diverse</p>
+                    <p>
+                      Considers only tokens with cumulative probability above
+                      this threshold
+                    </p>
+                    <p className="text-xs mt-1">
+                      Lower = more focused, higher = more diverse
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -173,7 +194,7 @@ export function GenerationSettings({
               max={1}
               step={0.05}
               value={[localOptions.top_p]}
-              onValueChange={(value) => updateOption('top_p', value[0])}
+              onValueChange={(value) => updateOption("top_p", value[0])}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -196,7 +217,9 @@ export function GenerationSettings({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p>Limits sampling to the K most likely next tokens</p>
-                    <p className="text-xs mt-1">Lower = more focused, higher = more varied</p>
+                    <p className="text-xs mt-1">
+                      Lower = more focused, higher = more varied
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -207,7 +230,7 @@ export function GenerationSettings({
               max={100}
               step={1}
               value={[localOptions.top_k]}
-              onValueChange={(value) => updateOption('top_k', value[0])}
+              onValueChange={(value) => updateOption("top_k", value[0])}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -230,7 +253,9 @@ export function GenerationSettings({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p>Penalizes repetition in the output</p>
-                    <p className="text-xs mt-1">1.0 = no penalty, higher = less repetition</p>
+                    <p className="text-xs mt-1">
+                      1.0 = no penalty, higher = less repetition
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -241,7 +266,9 @@ export function GenerationSettings({
               max={2}
               step={0.05}
               value={[localOptions.repeat_penalty]}
-              onValueChange={(value) => updateOption('repeat_penalty', value[0])}
+              onValueChange={(value) =>
+                updateOption("repeat_penalty", value[0])
+              }
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -266,29 +293,42 @@ export function GenerationSettings({
                 id="use_custom_system"
                 checked={localOptions.use_custom_system_prompt}
                 onCheckedChange={(checked) =>
-                  updateOption('use_custom_system_prompt', checked)
+                  updateOption("use_custom_system_prompt", checked)
                 }
               />
             </div>
             {localOptions.use_custom_system_prompt && (
-              <Textarea
-                placeholder="You are a helpful assistant..."
-                value={localOptions.system_prompt}
-                onChange={(e) => updateOption('system_prompt', e.target.value)}
-                rows={4}
-                className="font-mono text-sm"
-              />
+              <>
+                {onOpenPromptLibrary && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      onOpenPromptLibrary();
+                      onClose();
+                    }}
+                    className="w-full gap-2"
+                  >
+                    <FileCode className="h-4 w-4" />
+                    Browse Prompt Templates
+                  </Button>
+                )}
+                <Textarea
+                  placeholder="You are a helpful assistant..."
+                  value={localOptions.system_prompt}
+                  onChange={(e) =>
+                    updateOption("system_prompt", e.target.value)
+                  }
+                  rows={4}
+                  className="font-mono text-sm"
+                />
+              </>
             )}
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            className="gap-2"
-          >
+          <Button variant="outline" onClick={handleReset} className="gap-2">
             <RotateCcw className="h-4 w-4" />
             Reset to Defaults
           </Button>
@@ -296,15 +336,12 @@ export function GenerationSettings({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>
-              Save Changes
-            </Button>
+            <Button onClick={handleSave}>Save Changes</Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export { DEFAULT_OPTIONS as DEFAULT_GENERATION_OPTIONS }
-
+export { DEFAULT_OPTIONS as DEFAULT_GENERATION_OPTIONS };

@@ -1,152 +1,99 @@
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
-import { Button } from './ui/button'
-import { Eye, Code, Maximize2 } from 'lucide-react'
-import { toast } from '@/hooks/use-toast'
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Eye, Code, Maximize2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface CodePreviewProps {
-  code: string
-  language: string
+  code: string;
+  language: string;
 }
 
 export function CodePreview({ code, language }: CodePreviewProps) {
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [showCode, setShowCode] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [showCode, setShowCode] = useState(false);
 
-  const isWebCode = ['html', 'htm', 'xml'].includes(language.toLowerCase())
-  const isCss = language.toLowerCase() === 'css'
-  const isJs = ['javascript', 'js'].includes(language.toLowerCase())
+  const isWebCode = ["html", "htm", "xml"].includes(language.toLowerCase());
+  const isCss = language.toLowerCase() === "css";
+  const isJs = ["javascript", "js"].includes(language.toLowerCase());
 
   // Don't show preview button for non-web code
   if (!isWebCode && !isCss && !isJs) {
-    return null
+    return null;
   }
 
   const generatePreviewHtml = () => {
-    let html = code
+    let html = code;
 
     // If it's CSS, wrap it in style tags and add a demo
     if (isCss) {
-      html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 20px;
-      margin: 0;
-    }
-    ${code}
-  </style>
-</head>
-<body>
-  <div class="demo-content">
-    <h1>CSS Preview</h1>
-    <p>This is a paragraph to demonstrate the styles.</p>
-    <button>Button</button>
-    <div class="container">
-      <div class="box">Box 1</div>
-      <div class="box">Box 2</div>
-      <div class="box">Box 3</div>
-    </div>
-  </div>
-</body>
-</html>
-`
+      html = "<!DOCTYPE html>\n<html>\n<head>\n<style>\n";
+      html +=
+        "body { font-family: system-ui, sans-serif; padding: 20px; margin: 0; }\n";
+      html += code; // Insert CSS directly
+      html += "\n</style>\n</head>\n<body>\n";
+      html += '<div class="demo-content">\n';
+      html += "  <h1>CSS Preview</h1>\n";
+      html += "  <p>This is a paragraph to demonstrate the styles.</p>\n";
+      html += "  <button>Button</button>\n";
+      html += '  <div class="container">\n';
+      html += '    <div class="box">Box 1</div>\n';
+      html += '    <div class="box">Box 2</div>\n';
+      html += '    <div class="box">Box 3</div>\n';
+      html += "  </div>\n";
+      html += "</div>\n</body>\n</html>";
     }
 
     // If it's JS, wrap it in script tags with a basic HTML structure
     if (isJs) {
-      html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 20px;
-      margin: 0;
-    }
-    #output {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 5px;
-      margin-top: 20px;
-      white-space: pre-wrap;
-      font-family: monospace;
-    }
-  </style>
-</head>
-<body>
-  <h1>JavaScript Preview</h1>
-  <div id="root"></div>
-  <div id="output"></div>
-  <script>
-    // Override console.log to show output
-    const output = document.getElementById('output');
-    const originalLog = console.log;
-    console.log = function(...args) {
-      output.textContent += args.join(' ') + '\\n';
-      originalLog.apply(console, args);
-    };
-    
-    // User code
-    try {
-      ${code}
-    } catch (error) {
-      output.textContent = 'Error: ' + error.message;
-      output.style.color = 'red';
-    }
-  </script>
-</body>
-</html>
-`
+      html = "<!DOCTYPE html>\n<html>\n<head>\n<style>\n";
+      html +=
+        "body { font-family: system-ui, sans-serif; padding: 20px; margin: 0; background: #1a1a1a; color: #e0e0e0; }\n";
+      html += "h1 { color: #4fc3f7; font-size: 20px; margin-bottom: 20px; }\n";
+      html += "#root { min-height: 100px; margin-bottom: 20px; }\n";
+      html += "</style>\n</head>\n<body>\n";
+      html += "<h1>JavaScript Preview</h1>\n";
+      html += '<div id="root"></div>\n';
+      html += "<script>\n";
+      html += code;
+      html += "\n</script>\n</body>\n</html>";
     }
 
     // If it's HTML but doesn't have doctype, wrap it
-    if (isWebCode && !code.toLowerCase().includes('<!doctype')) {
-      html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-  </style>
-</head>
-<body>
-  ${code}
-</body>
-</html>
-`
+    if (isWebCode && !code.toLowerCase().includes("<!doctype")) {
+      html = "<!DOCTYPE html>\n<html>\n<head>\n";
+      html += '  <meta charset="UTF-8">\n';
+      html +=
+        '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n';
+      html += "  <style>\n";
+      html +=
+        "    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }\n";
+      html += "  </style>\n";
+      html += "</head>\n<body>\n";
+      html += code;
+      html += "\n</body>\n</html>";
     }
 
-    return html
-  }
+    return html;
+  };
 
   const handlePreview = () => {
-    setIsPreviewOpen(true)
-  }
+    setIsPreviewOpen(true);
+  };
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(code)
+    navigator.clipboard.writeText(code);
     toast({
-      title: 'Copied!',
-      description: 'Code copied to clipboard',
-    })
-  }
+      title: "Copied!",
+      description: "Code copied to clipboard",
+    });
+  };
 
   const getLanguageLabel = () => {
-    if (isCss) return 'CSS'
-    if (isJs) return 'JavaScript'
-    return 'HTML'
-  }
+    if (isCss) return "CSS";
+    if (isJs) return "JavaScript";
+    return "HTML";
+  };
 
   return (
     <>
@@ -173,7 +120,9 @@ export function CodePreview({ code, language }: CodePreviewProps) {
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="w-screen h-screen max-w-none max-h-none flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-          <DialogTitle className="sr-only">{getLanguageLabel()} Preview - Live rendering in secure sandbox</DialogTitle>
+          <DialogTitle className="sr-only">
+            {getLanguageLabel()} Preview - Live rendering in secure sandbox
+          </DialogTitle>
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur-sm border-b shadow-sm">
             <div className="flex items-center gap-3">
@@ -181,8 +130,12 @@ export function CodePreview({ code, language }: CodePreviewProps) {
                 <Eye className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="font-semibold text-lg">{getLanguageLabel()} Preview</h2>
-                <p className="text-xs text-muted-foreground">Live rendering in secure sandbox</p>
+                <h2 className="font-semibold text-lg">
+                  {getLanguageLabel()} Preview
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Live rendering in secure sandbox
+                </p>
               </div>
             </div>
             <Button
@@ -220,7 +173,7 @@ export function CodePreview({ code, language }: CodePreviewProps) {
                 <iframe
                   srcDoc={generatePreviewHtml()}
                   className="w-full h-full"
-                  sandbox="allow-scripts allow-modals allow-forms allow-popups"
+                  sandbox="allow-scripts"
                   title="Code Preview"
                   referrerPolicy="no-referrer"
                   loading="lazy"
@@ -233,15 +186,18 @@ export function CodePreview({ code, language }: CodePreviewProps) {
           <div className="flex items-center justify-center px-6 py-3 bg-background/95 backdrop-blur-sm border-t">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span>{showCode ? 'Source code view' : 'Live interactive preview'}</span>
+              <span>
+                {showCode ? "Source code view" : "Live interactive preview"}
+              </span>
               <span className="mx-2">•</span>
-              <kbd className="px-2 py-1 bg-muted rounded border text-[10px]">Esc</kbd>
+              <kbd className="px-2 py-1 bg-muted rounded border text-[10px]">
+                Esc
+              </kbd>
               <span>to close</span>
             </div>
           </div>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
-

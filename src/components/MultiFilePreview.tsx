@@ -1,119 +1,154 @@
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
-import { Button } from './ui/button'
-import { Layers, Code, Maximize2, Eye } from 'lucide-react'
-import { toast } from '@/hooks/use-toast'
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Layers, Code, Maximize2, Eye } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface CodeBlock {
-  language: string
-  code: string
+  language: string;
+  code: string;
 }
 
 interface MultiFilePreviewProps {
-  codeBlocks: CodeBlock[]
+  codeBlocks: CodeBlock[];
 }
 
 export function MultiFilePreview({ codeBlocks }: MultiFilePreviewProps) {
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [showCode, setShowCode] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [showCode, setShowCode] = useState(false);
 
   // Extract HTML, CSS, and JS from code blocks
-  const htmlBlock = codeBlocks.find(block => 
-    ['html', 'htm', 'xml'].includes(block.language)
-  )
-  const cssBlock = codeBlocks.find(block => block.language === 'css')
-  const jsBlock = codeBlocks.find(block => ['javascript', 'js'].includes(block.language))
+  const htmlBlock = codeBlocks.find((block) =>
+    ["html", "htm", "xml"].includes(block.language)
+  );
+  const cssBlock = codeBlocks.find((block) => block.language === "css");
+  const jsBlock = codeBlocks.find((block) =>
+    ["javascript", "js"].includes(block.language)
+  );
 
   // Don't show if we don't have at least 2 web files
-  const webBlocks = [htmlBlock, cssBlock, jsBlock].filter(Boolean)
+  const webBlocks = [htmlBlock, cssBlock, jsBlock].filter(Boolean);
   if (webBlocks.length < 2) {
-    return null
+    return null;
   }
 
   const generateCombinedHtml = () => {
-    let html = htmlBlock?.code || ''
-    const css = cssBlock?.code || ''
-    const js = jsBlock?.code || ''
+    let html = htmlBlock?.code || "";
+    const css = cssBlock?.code || "";
+    const js = jsBlock?.code || "";
+
+    // Just use JavaScript as-is to preserve global scope
+    let wrappedJs = "";
+    if (js) {
+      wrappedJs = js;
+    }
 
     // If HTML doesn't have doctype, it's probably a snippet
-    const isFullHtml = html.toLowerCase().includes('<!doctype') || 
-                       html.toLowerCase().includes('<html')
+    const isFullHtml =
+      html.toLowerCase().includes("<!doctype") ||
+      html.toLowerCase().includes("<html");
 
     if (isFullHtml) {
-      // Insert CSS and JS into existing HTML
+      // Replace external CSS links with inline styles
       if (css) {
-        // Try to insert CSS in head, or before </head>, or after <head>
-        if (html.includes('</head>')) {
-          html = html.replace('</head>', `  <style>\n${css}\n  </style>\n</head>`)
-        } else if (html.includes('<head>')) {
-          html = html.replace('<head>', `<head>\n  <style>\n${css}\n  </style>`)
+        // Remove any external CSS links
+        html = html.replace(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi, "");
+
+        // Insert inline CSS
+        if (html.includes("</head>")) {
+          html = html.replace(
+            "</head>",
+            "  <style>\n" + css + "\n  </style>\n</head>"
+          );
+        } else if (html.includes("<head>")) {
+          html = html.replace(
+            "<head>",
+            "<head>\n  <style>\n" + css + "\n  </style>"
+          );
         } else {
-          // Add head with style
-          html = html.replace('<html>', `<html>\n<head>\n  <style>\n${css}\n  </style>\n</head>`)
+          html = html.replace(
+            "<html>",
+            "<html>\n<head>\n  <style>\n" + css + "\n  </style>\n</head>"
+          );
         }
       }
 
-      if (js) {
-        // Try to insert JS before </body>, or at the end
-        if (html.includes('</body>')) {
-          html = html.replace('</body>', `  <script>\n${js}\n  </script>\n</body>`)
-        } else if (html.includes('</html>')) {
-          html = html.replace('</html>', `  <script>\n${js}\n  </script>\n</html>`)
+      if (wrappedJs) {
+        // Remove ALL script tags (both external src and empty placeholders)
+        html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
+
+        // Insert inline JavaScript at the very end before </body>
+        const bodyEndIndex = html.toLowerCase().lastIndexOf("</body>");
+        if (bodyEndIndex !== -1) {
+          html =
+            html.substring(0, bodyEndIndex) +
+            "\n<script>\n" +
+            wrappedJs +
+            "\n</script>\n" +
+            html.substring(bodyEndIndex);
         } else {
-          html += `\n<script>\n${js}\n</script>`
+          // No body tag, append at the end
+          html += "\n<script>\n" + wrappedJs + "\n</script>";
         }
       }
     } else {
-      // Build complete HTML from scratch
-      html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preview</title>
-  ${css ? `<style>\n${css}\n  </style>` : ''}
-</head>
-<body>
-${html}
-${js ? `<script>\n${js}\n  </script>` : ''}
-</body>
-</html>
-`
+      // Build complete HTML from scratch using simple string concatenation
+      let fullHtml = "<!DOCTYPE html>\n<html>\n<head>\n";
+      fullHtml += '  <meta charset="UTF-8">\n';
+      fullHtml +=
+        '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n';
+      fullHtml += "  <title>Preview</title>\n";
+
+      if (css) {
+        fullHtml += "  <style>\n" + css + "\n  </style>\n";
+      }
+
+      fullHtml += "</head>\n<body>\n";
+      fullHtml += html + "\n";
+
+      if (wrappedJs) {
+        fullHtml += "<script>\n" + wrappedJs + "\n</script>\n";
+      }
+
+      fullHtml += "</body>\n</html>";
+      return fullHtml;
     }
 
-    return html
-  }
+    return html;
+  };
 
   const handlePreview = () => {
-    setIsPreviewOpen(true)
-  }
+    setIsPreviewOpen(true);
+  };
 
   const handleCopyAll = () => {
-    const combined = `<!-- HTML -->\n${htmlBlock?.code || ''}\n\n` +
-                    `/* CSS */\n${cssBlock?.code || ''}\n\n` +
-                    `// JavaScript\n${jsBlock?.code || ''}`
-    navigator.clipboard.writeText(combined)
+    const combined =
+      `<!-- HTML -->\n${htmlBlock?.code || ""}\n\n` +
+      `/* CSS */\n${cssBlock?.code || ""}\n\n` +
+      `// JavaScript\n${jsBlock?.code || ""}`;
+    navigator.clipboard.writeText(combined);
     toast({
-      title: 'Copied!',
-      description: 'All code files copied to clipboard',
-    })
-  }
+      title: "Copied!",
+      description: "All code files copied to clipboard",
+    });
+  };
 
   const getFileCount = () => {
-    const files = []
-    if (htmlBlock) files.push('HTML')
-    if (cssBlock) files.push('CSS')
-    if (jsBlock) files.push('JS')
-    return files.join(' + ')
-  }
+    const files = [];
+    if (htmlBlock) files.push("HTML");
+    if (cssBlock) files.push("CSS");
+    if (jsBlock) files.push("JS");
+    return files.join(" + ");
+  };
 
   return (
     <>
       <div className="flex gap-2 mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
         <div className="flex-1 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
           <Layers className="h-4 w-4" />
-          <span className="font-medium">Multiple files detected: {getFileCount()}</span>
+          <span className="font-medium">
+            Multiple files detected: {getFileCount()}
+          </span>
         </div>
         <Button
           variant="default"
@@ -137,7 +172,9 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="w-screen h-screen max-w-none max-h-none flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-          <DialogTitle className="sr-only">Combined Preview - {getFileCount()} files - Live rendering</DialogTitle>
+          <DialogTitle className="sr-only">
+            Combined Preview - {getFileCount()} files - Live rendering
+          </DialogTitle>
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur-sm border-b shadow-sm">
             <div className="flex items-center gap-3">
@@ -146,7 +183,9 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
               </div>
               <div>
                 <h2 className="font-semibold text-lg">Combined Preview</h2>
-                <p className="text-xs text-muted-foreground">{getFileCount()} • Live rendering</p>
+                <p className="text-xs text-muted-foreground">
+                  {getFileCount()} • Live rendering
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -197,7 +236,9 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
                     <div className="rounded-xl border shadow-lg overflow-hidden bg-slate-950">
                       <div className="px-4 py-2 bg-orange-500/10 border-b border-orange-500/20 flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                        <span className="text-xs font-semibold text-orange-400">HTML</span>
+                        <span className="text-xs font-semibold text-orange-400">
+                          HTML
+                        </span>
                       </div>
                       <pre className="p-4 text-xs text-slate-100 font-mono overflow-auto max-h-64">
                         <code>{htmlBlock.code}</code>
@@ -208,7 +249,9 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
                     <div className="rounded-xl border shadow-lg overflow-hidden bg-slate-950">
                       <div className="px-4 py-2 bg-blue-500/10 border-b border-blue-500/20 flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <span className="text-xs font-semibold text-blue-400">CSS</span>
+                        <span className="text-xs font-semibold text-blue-400">
+                          CSS
+                        </span>
                       </div>
                       <pre className="p-4 text-xs text-slate-100 font-mono overflow-auto max-h-64">
                         <code>{cssBlock.code}</code>
@@ -219,7 +262,9 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
                     <div className="rounded-xl border shadow-lg overflow-hidden bg-slate-950">
                       <div className="px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/20 flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <span className="text-xs font-semibold text-yellow-400">JavaScript</span>
+                        <span className="text-xs font-semibold text-yellow-400">
+                          JavaScript
+                        </span>
                       </div>
                       <pre className="p-4 text-xs text-slate-100 font-mono overflow-auto max-h-64">
                         <code>{jsBlock.code}</code>
@@ -233,7 +278,7 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
                 <iframe
                   srcDoc={generateCombinedHtml()}
                   className="w-full h-full"
-                  sandbox="allow-scripts allow-modals allow-forms allow-popups"
+                  sandbox="allow-scripts"
                   title="Combined Code Preview"
                   referrerPolicy="no-referrer"
                   loading="lazy"
@@ -246,15 +291,18 @@ ${js ? `<script>\n${js}\n  </script>` : ''}
           <div className="flex items-center justify-center px-6 py-3 bg-background/95 backdrop-blur-sm border-t">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span>{showCode ? 'Viewing source files' : 'Live interactive preview'}</span>
+              <span>
+                {showCode ? "Viewing source files" : "Live interactive preview"}
+              </span>
               <span className="mx-2">•</span>
-              <kbd className="px-2 py-1 bg-muted rounded border text-[10px]">Esc</kbd>
+              <kbd className="px-2 py-1 bg-muted rounded border text-[10px]">
+                Esc
+              </kbd>
               <span>to close</span>
             </div>
           </div>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
-
