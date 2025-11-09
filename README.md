@@ -431,10 +431,6 @@ If you already have Ollama installed on your host machine and want to use it ins
        - "3000:5173"
      environment:
        - VITE_OLLAMA_API_URL=http://localhost:11434
-     # Remove or comment out the depends_on section:
-     # depends_on:
-     #   ollama:
-     #     condition: service_healthy
      networks:
        - symchat-network
    ```
